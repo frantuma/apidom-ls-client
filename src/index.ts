@@ -3,12 +3,18 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import fs from 'fs';
 import path from "path";
 import {rules} from "./rules";
+import {functions} from "./functions";
+import {loadFunctions} from "./utils";
 
 const customConfig = config();
 customConfig.rules = {
     openapi: {
         lint: rules(),
     }
+}
+
+customConfig.linterFunctions = {
+    openapi: { ...functions(), ...loadFunctions(path.join(__dirname, '..', 'src', 'functions')) }
 }
 
 const context: LanguageServiceContext = {
@@ -27,6 +33,9 @@ const specOpenapi = fs
 const doc = TextDocument.create('foo://bar/specOpenapi.yaml', 'apidom', 0, specOpenapi);
 languageService.doValidation(doc).then((diagnostics) => {
     console.log(JSON.stringify(diagnostics, null, 2));
+    for (let d of diagnostics) {
+        console.log(d.code + ': ' + d.message, d.range.start.line + '-' + d.range.start.character)
+    }
     languageService.terminate();
 
 });
