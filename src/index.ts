@@ -34,7 +34,10 @@ const doc = TextDocument.create('foo://bar/specOpenapi.yaml', 'apidom', 0, specO
 languageService.doValidation(doc).then((diagnostics) => {
     console.log(JSON.stringify(diagnostics, null, 2));
     for (let d of diagnostics) {
-        console.log(d.code + ': ' + d.message, d.range.start.line + '-' + d.range.start.character)
+        const sev = (d.severity === 1 ? 'error' : 'warning').padEnd(7, ' ');
+        const range = `${d.range.start.line}-${d.range.start.character}:${d.range.end.line}-${d.range.end.character}`.padEnd(20, ' ');
+        const code = `${d.code}(${d.source})`.padEnd(20, ' ');
+        console.log(range + '\t' + code + '\t' + sev + '\t' + d.message)
     }
     languageService.terminate();
 
